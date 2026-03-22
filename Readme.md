@@ -1,4 +1,4 @@
-# jsm - Mini React-like UI Library
+# jsm - javascript minimal reactive library
 
 A small reactive component system for the browser with hook-style APIs, lightweight DOM diffing, and a declarative component model.
 
