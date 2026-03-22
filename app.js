@@ -33,12 +33,18 @@ const TodoItem = Jsm(({todo, onToggle, onRemove}) => {
 const App = Jsm(() => {
   const todos = useState([]);
   const newTodoText = useState('');
+  const draftTodo = useState(null);
   const statusMessage = useState('Ready');
   const inputId = useMemo(() => `todo-input-${Date.now()}`, []);
 
+  const allTodos = useMemo(() => {
+    if (!draftTodo.value) return todos.value;
+    return [...todos.value, draftTodo.value];
+  }, [todos, draftTodo]);
+
   useEffect(() => {
-    statusMessage.value = `You have ${todos.value.length} todo${todos.value.length === 1 ? '' : 's'}`;
-  }, [todos]);
+    statusMessage.value = `You have ${allTodos.length} todo${allTodos.length === 1 ? '' : 's'}`;
+  }, [allTodos]);
 
   useEffect(() => {
     const inputNode = document.getElementById(inputId);
@@ -71,19 +77,29 @@ const App = Jsm(() => {
 
     todos.value = [...todos.value, nextTodo];
     newTodoText.value = '';
+    draftTodo.value = null;
     statusMessage.value = 'Todo added!';
-  }, [todos, newTodoText, statusMessage]);
+  }, [todos, newTodoText, draftTodo, statusMessage]);
 
   const toggleTodo = useCallback((id) => {
+    if (draftTodo.value && draftTodo.value.id === id) {
+      draftTodo.value = {...draftTodo.value, completed: !draftTodo.value.completed};
+      return;
+    }
+
     todos.value = todos.value.map(todo =>
       todo.id === id ? {...todo, completed: !todo.completed} : todo
     );
-  }, [todos]);
+  }, [todos, draftTodo]);
 
   const clearCompleted = useCallback(() => {
     todos.value = todos.value.filter(todo => !todo.completed);
+    if (draftTodo.value && draftTodo.value.completed) {
+      draftTodo.value = null;
+      newTodoText.value = '';
+    }
     statusMessage.value = 'Completed todos cleared';
-  }, [todos, statusMessage]);
+  }, [todos, draftTodo, newTodoText, statusMessage]);
 
   return Div({
     style: {
@@ -113,7 +129,22 @@ const App = Jsm(() => {
         type: 'text',
         value: newTodoText.value,
         placeholder: 'Enter a new todo',
-        onInput: (e) => newTodoText.value = e.target.value,
+        onInput: (e) => {
+          const value = e.target.value;
+          newTodoText.value = value;
+
+          const trimmed = value.trim();
+          if (!trimmed) {
+            draftTodo.value = null;
+            return;
+          }
+
+          draftTodo.value = {
+            id: 'draft',
+            text: value,
+            completed: false
+          };
+        },
         style: {flex: '1', padding: '10px 12px', borderRadius: '8px', border: '1px solid #ccc', outline: 'none'}
       }),
       Button({
@@ -137,8 +168,15 @@ const App = Jsm(() => {
     ),
 
     Div({style: {display: 'grid', gap: '8px'}},
-      ...todos.value.map(todo =>
+      ...allTodos.map(todo =>
         TodoItem({todo, onToggle: toggleTodo, onRemove: (id) => {
+          if (draftTodo.value && draftTodo.value.id === id) {
+            draftTodo.value = null;
+            newTodoText.value = '';
+            statusMessage.value = 'Draft todo removed';
+            return;
+          }
+
           todos.value = todos.value.filter(item => item.id !== id);
           statusMessage.value = 'Todo removed';
         }})
@@ -148,7 +186,7 @@ const App = Jsm(() => {
     Div({style: {marginTop: '20px', color: '#333', fontSize: '14px'}},
       Span(`Active: ${activeTodos.length}`),
       Span({style: {marginLeft: '18px'}}, `Completed: ${completedTodos.length}`),
-      Span({style: {marginLeft: '18px'}}, `Total: ${todos.value.length}`)
+      Span({style: {marginLeft: '18px'}}, `Total: ${allTodos.length}`)
     )
   );
 });
