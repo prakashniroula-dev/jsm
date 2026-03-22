@@ -1,0 +1,34 @@
+import { GenericProps, JsmComponentFn } from "./component";
+
+type JsmDomNode<P extends GenericProps> = JsmComponentFn<P>;
+
+export const Div: JsmDomNode<HTMLDivElement>;
+export const Span: JsmDomNode<HTMLSpanElement>;
+export const Button: JsmDomNode<HTMLButtonElement>;
+export const Input: JsmDomNode<HTMLInputElement>;
+export const P: JsmDomNode<HTMLParagraphElement>;
+export const Link: JsmDomNode<HTMLAnchorElement>;
+export const Img: JsmDomNode<HTMLImageElement>;
+export const Ul: JsmDomNode<HTMLUListElement>;
+export const Ol: JsmDomNode<HTMLOListElement>;
+export const Li: JsmDomNode<HTMLLIElement>;
+export const Section: JsmDomNode<HTMLElement>;
+export const Article: JsmDomNode<HTMLElement>;
+export const Header: JsmDomNode<HTMLElement>;
+export const Footer: JsmDomNode<HTMLElement>;
+export const Nav: JsmDomNode<HTMLElement>;
+export const Main: JsmDomNode<HTMLElement>;
+export const Aside: JsmDomNode<HTMLElement>;
+export const Form: JsmDomNode<HTMLFormElement>;
+export const Label: JsmDomNode<HTMLLabelElement>;
+export const Textarea: JsmDomNode<HTMLTextAreaElement>;
+export const Select: JsmDomNode<HTMLSelectElement>;
+export const Option: JsmDomNode<HTMLOptionElement>;
+export const H1: JsmDomNode<HTMLHeadingElement>;
+export const H2: JsmDomNode<HTMLHeadingElement>;
+export const H3: JsmDomNode<HTMLHeadingElement>;
+export const H4: JsmDomNode<HTMLHeadingElement>;
+export const H5: JsmDomNode<HTMLHeadingElement>;
+export const H6: JsmDomNode<HTMLHeadingElement>;
+export const H7: JsmDomNode<HTMLHeadingElement>;
+export const H8: JsmDomNode<HTMLHeadingElement>;
