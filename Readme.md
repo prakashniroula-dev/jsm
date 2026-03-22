@@ -4,7 +4,7 @@ A small reactive component system for the browser with hook-style APIs, lightwei
 
 ## 🚀 Overview
 
-`jsm` is a minimal JavaScript UI toolkit designed for learning and building interactive frontend experiences without React, Vue, or heavy frameworks.
+`jsm` is a minimal JavaScript reactive system designed for learning and building interactive frontend experiences without React, Vue, or heavy frameworks.
 
 It provides:
 
