@@ -39,6 +39,7 @@ It provides:
 - `useCallback`: stable handlers (`addTodo`, `toggleTodo`, `clearCompleted`)
 - dynamic element rendering and array mapping
 - plain CSS styles in JS via `style` prop
+- **Key-based list reconciliation** (optional `key` prop maintains element identity during reorder/delete)
 
 ### Features in demo
 
@@ -49,6 +50,7 @@ It provides:
 - Clear completed
 - Status counters (active / completed / total)
 - auto-save debug log interval
+- Click counter per todo (demonstrates key-based reconciliation preserving state)
 
 ##  Usage
 

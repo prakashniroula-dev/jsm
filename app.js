@@ -1,6 +1,24 @@
 import {Button, Div, Form, Input, Span, Jsm, useState, useEffect, useMemo, useCallback} from './lib/jsm.js';
 
-const TodoItem = Jsm(({todo, onToggle, onRemove}) => {
+const TodoItem = Jsm((props) => {
+  // Add internal click counter to demonstrate the bug
+  const clickCount = useState(0);
+  const {todo, onToggle, onRemove} = props || {todo: {text: 'default'}, onToggle: () => {}, onRemove: () => {}};
+
+  useEffect(() => {
+    console.log(`Todo "${todo.text}" is now ${todo.completed ? 'completed' : 'incomplete'}. Click count: ${clickCount.value}`);
+  }, [todo.completed]);
+
+  useEffect(() => {
+    console.log(`Todo ${todo.text} created.`);
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      console.log(`Todo "${todo.text}" is being removed. Final click count: ${clickCount.value}`);
+    }
+  }, [])
+  
   return Div({
     style: {
       display: 'flex',
@@ -21,7 +39,18 @@ const TodoItem = Jsm(({todo, onToggle, onRemove}) => {
         checked: todo.completed,
         onChange: () => onToggle(todo.id)
       }),
-      Span({style: {textDecoration: todo.completed ? 'line-through' : 'none'}}, todo.text)
+      Span({
+        style: {
+          textDecoration: todo.completed ? 'line-through' : 'none',
+          flex: 1
+        }
+      }, `${todo.text} (clicked ${clickCount.value}x)`),
+      Button({
+        onClick: () => {
+          clickCount.value++;
+        },
+        style: {backgroundColor: '#6c7ddb', color: 'white', border: 'none', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', cursor: 'pointer'}
+      }, 'Click')
     ),
     Button({
       onClick: () => onRemove(todo.id),
@@ -37,10 +66,7 @@ const App = Jsm(() => {
   const statusMessage = useState('Ready');
   const inputId = useMemo(() => `todo-input-${Date.now()}`, []);
 
-  const allTodos = useMemo(() => {
-    if (!draftTodo.value) return todos.value;
-    return [...todos.value, draftTodo.value];
-  }, [todos, draftTodo]);
+  const allTodos = todos.value;
 
   useEffect(() => {
     statusMessage.value = `You have ${allTodos.length} todo${allTodos.length === 1 ? '' : 's'}`;
@@ -49,14 +75,6 @@ const App = Jsm(() => {
   useEffect(() => {
     const inputNode = document.getElementById(inputId);
     if ( inputNode ) inputNode.focus();
-  }, []);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      console.log('Auto-save simulation', new Date().toLocaleTimeString());
-    }, 30000);
-
-    return () => clearInterval(timer);
   }, []);
 
   const activeTodos = useMemo(() => todos.value.filter(t => !t.completed), [todos]);
@@ -72,34 +90,32 @@ const App = Jsm(() => {
     const nextTodo = {
       id: Date.now(),
       text,
-      completed: false
+      completed: draftTodo.value?.completed || false
     };
 
-    todos.value = [...todos.value, nextTodo];
+    todos.value = [nextTodo, ...todos.value];
     newTodoText.value = '';
     draftTodo.value = null;
     statusMessage.value = 'Todo added!';
   }, [todos, newTodoText, draftTodo, statusMessage]);
 
   const toggleTodo = useCallback((id) => {
-    if (draftTodo.value && draftTodo.value.id === id) {
+    if ( id === 'draft' ) {
       draftTodo.value = {...draftTodo.value, completed: !draftTodo.value.completed};
       return;
     }
-
     todos.value = todos.value.map(todo =>
       todo.id === id ? {...todo, completed: !todo.completed} : todo
     );
   }, [todos, draftTodo]);
 
   const clearCompleted = useCallback(() => {
-    todos.value = todos.value.filter(todo => !todo.completed);
-    if (draftTodo.value && draftTodo.value.completed) {
+    if ( draftTodo.value?.completed ) {
       draftTodo.value = null;
-      newTodoText.value = '';
     }
+    todos.value = todos.value.filter(todo => !todo.completed);
     statusMessage.value = 'Completed todos cleared';
-  }, [todos, draftTodo, newTodoText, statusMessage]);
+  }, [todos, newTodoText, statusMessage, draftTodo]);
 
   return Div({
     style: {
@@ -168,15 +184,9 @@ const App = Jsm(() => {
     ),
 
     Div({style: {display: 'grid', gap: '8px'}},
+      draftTodo.value && TodoItem({key: 'draft', todo: draftTodo.value, onToggle: toggleTodo, onRemove: () => draftTodo.value = null}),
       ...allTodos.map(todo =>
-        TodoItem({todo, onToggle: toggleTodo, onRemove: (id) => {
-          if (draftTodo.value && draftTodo.value.id === id) {
-            draftTodo.value = null;
-            newTodoText.value = '';
-            statusMessage.value = 'Draft todo removed';
-            return;
-          }
-
+        TodoItem({key: todo.id, todo, onToggle: toggleTodo, onRemove: (id) => {
           todos.value = todos.value.filter(item => item.id !== id);
           statusMessage.value = 'Todo removed';
         }})
