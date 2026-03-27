@@ -1,8 +1,11 @@
-# jsm - Mini React-like UI Library
+# jsm - javascript minimal reactive library
 
 A small reactive component system for the browser with hook-style APIs, lightweight DOM diffing, and a declarative component model.
 
-## 🚀 Overview
+## Live example
+Live example to-do app : [view it live](https://prakashniroula-dev.github.io/jsm)
+
+## Overview
 
 `jsm` is a minimal JavaScript reactive system designed for learning and building interactive frontend experiences without React, Vue, or heavy frameworks.
 
