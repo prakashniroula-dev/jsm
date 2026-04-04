@@ -1,36 +1,62 @@
 
-/* hooks.d.ts */
+// Hooks
 type State<S> = {
   value: S;
   hookIndex: number;
   component: any;
 };
 
+/**
+ * useState creates or retrieves reactive state.
+ * Must be called during component render (not conditionally).
+ * @throws {Error} if called outside component context or if hook count changes across renders
+ */
 export function useState<S>(initialState: S): State<S>;
+/**
+ * useEffect runs side effects and registers cleanup functions.
+ * Must be called during component render (not conditionally).
+ * @throws {Error} if called outside component context or if hook count changes across renders
+ */
 export function useEffect(effect: () => void, deps: State<any>[]): void;
+
+/**
+ * useRef creates a mutable reference that persists across renders.
+ * Must be called during component render (not conditionally).
+ * @throws {Error} if called outside component context or if hook count changes across renders
+ */
 export function useRef<T>(initialValue: T): { current: T };
+
+/**
+ * useMemo memoizes computed values and invalidates when deps change.
+ * Must be called during component render (not conditionally).
+ * @throws {Error} if called outside component context or if hook count changes across renders
+ */
 export function useMemo<T>(factory: () => T, deps: State<any>[]): T;
 export function useCallback(callback: () => void, deps: State<any>[]): () => void;
+export function batchUpdate(instance: any, fn: () => void): void;
 
-/* components.d.ts */
+// Components
 type GenericProps = Record<string, any>;
 
-type JsmComponent<P extends GenericProps> = {
+export type JsmComponent<P extends GenericProps> = {
   props: P;
   hooks: any[];
   hookIndex: number;
-  renderEffects: Set<number>; // set of hook indices ( run effects every render )
-  oneTimeEffects: Set<number>; // set of hook indices ( run effects only on first render )
+  renderEffects: Set<number>;
+  oneTimeEffects: Set<number>;
   render: () => JsmNode<any>;
-  update: () => Promise<void>;
+  update: () => void;
   node: JsmNode<P> | null;
+  _expectedHookCount?: number;
 }
 
-export type JsmNode<P extends GenericProps> = string | number | boolean | null | {
+export type JsmNode<P extends GenericProps & {key?: string | number}> = string | number | boolean | null | {
+  __node: true,
   nodeType: string | JsmComponent<P>;
-  props: P;
-  __node: true;
-  instance?: JsmComponent<P>; // for old instances
+  props: P & {key?: string | number};
+  instance?: JsmComponent<P>;
+  _instance?: any;
+  _eventHandlers?: Record<string, Function>;
 };
 
 type JsmComponentFn<P extends GenericProps> = {
@@ -39,13 +65,19 @@ type JsmComponentFn<P extends GenericProps> = {
   (): JsmNode<P>;
 }
 
-export function Jsm<P extends GenericProps>(componentFn: (props: P) => JsmNode<P>): JsmComponentFn<P>;
+type JsmDomComponent<P extends GenericProps> = {
+  (tag: string, props: P, ...children: JsmNode<any>[]): JsmNode<P>;
+  (tag: string, ...children: JsmNode<any>[]): JsmNode<P>;
+  (tag: string): JsmNode<P>;
+}
 
-/* render.d.ts */
+export function Jsm<P extends GenericProps>(componentFn: (props: P) => JsmNode<P>): JsmComponentFn<P>;
+export const JsmDom: JsmDomComponent<GenericProps>;
+
+// Render
 export function render<P extends GenericProps>(node: JsmNode<P>, container: HTMLElement): void;
 
-/* elements.d.ts */
-
+// Elements
 type JsmDomNode<P extends GenericProps> = JsmComponentFn<P>;
 
 export const Div: JsmDomNode<HTMLDivElement>;

@@ -19,7 +19,7 @@ export function useState<S>(initialState: S): State<S>;
  * Must be called during component render (not conditionally).
  * @throws {Error} if called outside component context or if hook count changes across renders
  */
-export function useEffect(effect: () => void, deps: State<any>[]): void;
+export function useEffect(effect: () => void, deps?: any[]): void;
 
 /**
  * useRef creates a mutable reference that persists across renders.
@@ -33,7 +33,9 @@ export function useRef<T>(initialValue: T): { current: T };
  * Must be called during component render (not conditionally).
  * @throws {Error} if called outside component context or if hook count changes across renders
  */
-export function useMemo<T>(factory: () => T, deps: State<any>[]): T;
-export function useCallback(callback: () => void, deps: State<any>[]): () => void;
+export function useMemo<T>(factory: () => T, deps: any[]): T;
+export function useCallback(callback: () => void, deps: any[]): () => void;
 export function batchUpdate(instance: any, fn: () => void): void;
 export function getCurrentComponent(): any;
+export function useCss(cssText?: string): void;
+export function useDynamicCss(cssText?: string): void;

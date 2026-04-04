@@ -1,6 +1,6 @@
 import { GenericProps, JsmComponentFn } from "./component";
 
-type JsmDomNode<P extends GenericProps> = JsmComponentFn<P>;
+type JsmDomNode<P extends GenericProps> = JsmComponentFn<GenericProps>;
 
 export const Div: JsmDomNode<HTMLDivElement>;
 export const Span: JsmDomNode<HTMLSpanElement>;

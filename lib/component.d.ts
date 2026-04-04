@@ -2,6 +2,8 @@
 type GenericProps = Record<string, any>;
 
 export type JsmComponent<P extends GenericProps> = {
+  __component: true;
+  _scope: string; // CSS scope identifier
   props: P;
   hooks: any[];
   hookIndex: number;
@@ -9,12 +11,17 @@ export type JsmComponent<P extends GenericProps> = {
   oneTimeEffects: Set<number>; // set of hook indices ( run effects only on first render )
   render: () => JsmNode<any>;
   update: () => void;  // synchronous update
+  onMount?: () => void;
+  onUnmount?: () => void;
+  renderTree?: JsmNode<any>;
+  domNode?: Node;
   node: JsmNode<P> | null;
   _expectedHookCount?: number; // validates hook count consistency across renders (detects conditional hooks)
 }
 
 export type JsmNode<P extends GenericProps & {key?: string | number}> = string | number | boolean | null | {
   __node: true,
+  componentName?: string; // for debugging
   nodeType: string | JsmComponent<P>;
   props: P & {key?: string | number}; // optional key prop for list reconciliation (like React)
   instance?: JsmComponent<P>; // for old instances
@@ -34,5 +41,5 @@ type JsmDomComponent<P extends GenericProps> = {
   (tag: string): JsmNode<P>;
 }
 
-export function Jsm<P extends GenericProps>(componentFn: (props: P) => JsmNode<P>): JsmComponentFn<P>;
+export function Jsm<P extends GenericProps>(componentFn: (props: P) => JsmNode<P>, componentName?: string): JsmComponentFn<P>;
 export const JsmDom: JsmDomComponent<GenericProps>;
